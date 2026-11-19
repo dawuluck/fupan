@@ -63,11 +63,11 @@ function parseGoogleLine(line: string): string | null {
   }
 }
 
-function buildOpenAiBody(messages: ChatMessage[]): unknown {
+function buildOpenAiBody(messages: ChatMessage[]) {
   return { messages, stream: true }
 }
 
-function buildAnthropicBody(messages: ChatMessage[]): unknown {
+function buildAnthropicBody(messages: ChatMessage[]) {
   const systemMessages = messages.filter((m) => m.role === "system")
   const conversationMessages = messages.filter((m) => m.role !== "system")
   const system = systemMessages.map((m) => m.content).join("\n") || undefined
@@ -146,6 +146,27 @@ export function getProviderConfig(config: LlmConfig): ProviderConfig {
         buildBody: buildGoogleBody,
         parseStream: parseGoogleLine,
       }
+
+    case "deepseek": {
+      // DeepSeek is fully OpenAI-compatible (SSE + delta.content).
+      // Allow an optional endpoint override so users can route through a
+      // proxy / gateway while keeping the first-class preset.
+      const baseUrl = customEndpoint
+        ? customEndpoint.replace(/\/+$/, "")
+        : "https://api.deepseek.com/v1"
+      return {
+        url: `${baseUrl}/chat/completions`,
+        headers: {
+          "Content-Type": JSON_CONTENT_TYPE,
+          Authorization: `Bearer ${apiKey}`,
+        },
+        buildBody: (messages) => ({
+          ...buildOpenAiBody(messages),
+          model,
+        }),
+        parseStream: parseOpenAiLine,
+      }
+    }
 
     case "ollama":
       return {

@@ -1,7 +1,15 @@
 import { describe, it, expect } from "vitest"
+import { getProviderConfig } from "@/lib/llm-providers"
 
 // Inline minimal types to avoid store/zustand dependencies in unit tests
-type Provider = "openai" | "anthropic" | "google" | "ollama" | "custom" | "minimax"
+type Provider =
+  | "openai"
+  | "anthropic"
+  | "google"
+  | "deepseek"
+  | "ollama"
+  | "custom"
+  | "minimax"
 
 interface LlmConfig {
   provider: Provider
@@ -96,5 +104,58 @@ describe("MiniMax provider registration", () => {
   it("minimax is a valid provider value in the type union", () => {
     const provider: Provider = "minimax"
     expect(provider).toBe("minimax")
+  })
+})
+
+// --- DeepSeek: tests the real implementation, not a copy ---
+// llm-providers.ts only imports *types* from the store, so importing it here
+// pulls in no zustand/Tauri runtime.
+const deepseekConfig = (overrides: Partial<LlmConfig> = {}): LlmConfig =>
+  makeConfig({ provider: "deepseek", model: "deepseek-chat", ...overrides })
+
+describe("DeepSeek Provider", () => {
+  it("defaults to the official DeepSeek endpoint", () => {
+    const cfg = getProviderConfig(deepseekConfig())
+    expect(cfg.url).toBe("https://api.deepseek.com/v1/chat/completions")
+  })
+
+  it("honours an endpoint override for proxies / gateways", () => {
+    const cfg = getProviderConfig(
+      deepseekConfig({ customEndpoint: "https://my-gateway.example.com/v1" })
+    )
+    expect(cfg.url).toBe("https://my-gateway.example.com/v1/chat/completions")
+  })
+
+  it("strips trailing slashes from the endpoint override", () => {
+    const cfg = getProviderConfig(
+      deepseekConfig({ customEndpoint: "https://my-gateway.example.com/v1///" })
+    )
+    expect(cfg.url).toBe("https://my-gateway.example.com/v1/chat/completions")
+  })
+
+  it("authenticates with a Bearer token", () => {
+    const cfg = getProviderConfig(deepseekConfig({ apiKey: "sk-deepseek" }))
+    expect(cfg.headers.Authorization).toBe("Bearer sk-deepseek")
+    expect(cfg.headers["Content-Type"]).toBe("application/json")
+  })
+
+  it("streams with the selected model", () => {
+    const cfg = getProviderConfig(deepseekConfig({ model: "deepseek-reasoner" }))
+    const body = cfg.buildBody([{ role: "user", content: "hi" }]) as Record<string, unknown>
+    expect(body.stream).toBe(true)
+    expect(body.model).toBe("deepseek-reasoner")
+  })
+
+  it("parses OpenAI-compatible SSE chunks", () => {
+    const cfg = getProviderConfig(deepseekConfig())
+    const chunk = JSON.stringify({ choices: [{ delta: { content: "你好" } }] })
+    expect(cfg.parseStream(`data: ${chunk}`)).toBe("你好")
+    expect(cfg.parseStream("data: [DONE]")).toBeNull()
+    expect(cfg.parseStream(": keep-alive")).toBeNull()
+  })
+
+  it("deepseek is a valid provider value in the type union", () => {
+    const provider: Provider = "deepseek"
+    expect(provider).toBe("deepseek")
   })
 })

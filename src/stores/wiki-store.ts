@@ -3,7 +3,7 @@ import type { WikiProject, FileNode } from "@/types/wiki"
 import type { AppTheme } from "@/types/theme"
 
 interface LlmConfig {
-  provider: "openai" | "anthropic" | "google" | "ollama" | "custom" | "minimax"
+  provider: "openai" | "anthropic" | "google" | "deepseek" | "ollama" | "custom" | "minimax"
   apiKey: string
   model: string
   ollamaUrl: string

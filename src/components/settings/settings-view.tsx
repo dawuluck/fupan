@@ -16,6 +16,7 @@ const PROVIDERS = [
   { value: "openai" as const, label: "OpenAI", models: ["gpt-4o", "gpt-4.1", "gpt-4o-mini"] },
   { value: "anthropic" as const, label: "Anthropic", models: ["claude-sonnet-4-5-20250514", "claude-opus-4-5-20250514", "claude-haiku-4-5-20251001"] },
   { value: "google" as const, label: "Google", models: ["gemini-2.5-pro", "gemini-2.5-flash"] },
+  { value: "deepseek" as const, label: "DeepSeek", models: ["deepseek-chat", "deepseek-reasoner"] },
   { value: "minimax" as const, label: "MiniMax", models: ["MiniMax-M2.7", "MiniMax-M2.7-highspeed"] },
   { value: "ollama" as const, label: "Ollama (Local)", models: [] },
   { value: "custom" as const, label: "Custom", models: [] },
@@ -80,6 +81,28 @@ export function SettingsView() {
   }, [searchApiConfig])
 
   const currentProvider = PROVIDERS.find((p) => p.value === provider)
+
+  // Providers that expose an editable API endpoint (optional override)
+  const hasEndpointField =
+    provider === "custom" || provider === "minimax" || provider === "deepseek"
+  const endpointLabel =
+    provider === "minimax"
+      ? "MiniMax Endpoint"
+      : provider === "deepseek"
+        ? "DeepSeek Endpoint"
+        : t("settings.customEndpoint")
+  const endpointPlaceholder =
+    provider === "minimax"
+      ? "https://api.minimax.io/v1"
+      : provider === "deepseek"
+        ? "https://api.deepseek.com/v1"
+        : "https://your-api.example.com/v1"
+  const endpointHint =
+    provider === "minimax"
+      ? "国内用户请填写 https://api.minimaxi.com/v1，国际用户可留空使用默认 endpoint"
+      : provider === "deepseek"
+        ? "留空则使用官方 https://api.deepseek.com/v1；如需走中转 / 代理可在此填写"
+        : t("settings.customEndpointHint")
 
   async function handleSave() {
     const { saveLlmConfig, saveSearchApiConfig, saveEmbeddingConfig } = await import("@/lib/project-store")
@@ -193,22 +216,16 @@ export function SettingsView() {
               </div>
             </div>
 
-            {(provider === "custom" || provider === "minimax") && (
+            {hasEndpointField && (
               <div className="space-y-2">
-                <Label htmlFor="customEndpoint">
-                  {provider === "minimax" ? "MiniMax Endpoint" : t("settings.customEndpoint")}
-                </Label>
+                <Label htmlFor="customEndpoint">{endpointLabel}</Label>
                 <Input
                   id="customEndpoint"
                   value={customEndpoint}
                   onChange={(e) => setCustomEndpoint(e.target.value)}
-                  placeholder={provider === "minimax" ? "https://api.minimax.io/v1" : "https://your-api.example.com/v1"}
+                  placeholder={endpointPlaceholder}
                 />
-                <p className="text-xs text-muted-foreground">
-                  {provider === "minimax"
-                    ? "国内用户请填写 https://api.minimaxi.com/v1，国际用户可留空使用默认 endpoint"
-                    : t("settings.customEndpointHint")}
-                </p>
+                <p className="text-xs text-muted-foreground">{endpointHint}</p>
               </div>
             )}
 
