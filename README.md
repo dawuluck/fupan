@@ -1,5 +1,12 @@
 # Trading Review Wiki Codex CLI
 
+> **Fork notice / 衍生说明**
+>
+> 本仓库是 [ymj8903668-droid/trading-review-wiki](https://github.com/ymj8903668-droid/trading-review-wiki) 的 fork。原始代码版权归原作者 **杰哥（ymj0418）** 所有，依 **GNU GPL-3.0** 许可证发布，`LICENSE` 文件保持原样未作修改。
+>
+> - `main` 分支：与上游同步的原始代码（v0.17.0），未作改动
+> - `deepseek-provider` 分支：基于上游 **v0.7.4** 修改，新增 **DeepSeek** 大模型提供商支持（设置页可选 `deepseek-chat` / `deepseek-reasoner`，默认接口 `https://api.deepseek.com/v1`）
+
 > 面向交易复盘知识库的 Codex CLI 工具集：把 raw 资料、正式 wiki、图谱、长期记忆、结构化事实和行情 SQL 组织成一个可检索、可验证、可迭代的交易研究系统。
 
 作者：杰哥｜公众号：`ymj0418`
