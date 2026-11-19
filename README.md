@@ -1,5 +1,15 @@
 # 交易评论维基 · Trading Review Wiki
 
+> **Fork notice / 衍生说明**
+>
+> This repository is a fork of [ymj8903668-droid/trading-review-wiki](https://github.com/ymj8903668-droid/trading-review-wiki).
+> 本仓库基于上游 **v0.7.4** 修改，新增 **DeepSeek** 大模型提供商支持：设置页可直接选择 `deepseek-chat` 或 `deepseek-reasoner`，默认接口 `https://api.deepseek.com/v1`。
+>
+> 原始代码版权归原作者 **ymj0418** 所有，依 **GNU GPL-3.0** 许可证发布；本项目作为衍生作品同样遵循 GPL-3.0，`LICENSE` 文件保持原样未作修改。
+>
+> - 上游仓库：https://github.com/ymj8903668-droid/trading-review-wiki
+> - 本仓库改动所在分支：`deepseek-provider`
+
 <p align="center">
   <img src="logo.jpg" width="128" height="128" style="border-radius: 22%;" alt="Trading Review Wiki Logo">
 </p>
